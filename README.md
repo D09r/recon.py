@@ -7,7 +7,7 @@ Recon - A collection of an IP and Network Tools that can be used to quickly get 
 Note: There is a 500 URLs limit per request for Google's SafeBrowsing lookup and 100 API requests per day from a single IP address for other tools lookup.
 
 ### Setting up an API KEY
-To set up a Google's SafeBrwosing API key, see [Setting up API keys](https://cloud.google.com/docs/authentication/api-keys?hl=en&ref_topic=6262490&visit_id=1-636670504281135868-1002741086&rd=1#creating_an_api_key "Creating an API key").
+To set up a Google's SafeBrowsing API key, see [Setting up API keys](https://cloud.google.com/docs/authentication/api-keys?hl=en&ref_topic=6262490&visit_id=1-636670504281135868-1002741086&rd=1#creating_an_api_key "Creating an API key").
 
 Once created an API KEY, set a local environment variable as GSB_API_KEY with it.
 
