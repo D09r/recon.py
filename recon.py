@@ -1,28 +1,45 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 #title                  : recon.py
 #description            : Recon is a collection of an IP and Network Tools that can be used to quickly get 							  information about IP Addresses, Web Pages, and DNS records.
 #author                 : D09r                   
-#date                   : 20180623             
+#date                   : 20180705
 #version                : 0.0.9                   
 #usage                  : python recon.py
-#notes                  : There is a limit of 100 API requests per day from a single IP address.
+#notes                  : There is a 500 URLs limit per request for Google's SafeBrowsing lookup and 100 API                           requests per day from a single IP address for other tools lookup.
 #opensource             : https://github.com/d09r/recon
                                                  
 #======================================================================================================== 
 
 from __future__ import print_function
-import os
-import urllib2
-import urlparse
-import datetime
-import httplib
-import logging
+
+try:
+	import os
+	import json
+	import urllib
+	import urllib2
+	import urlparse
+	import datetime
+	import httplib
+	import logging
+except ImportError, e:
+	print('"'+str(e)+'"' + " << Please install this module and try again!\n")
+	print("The following list of python modules is required to run this script!")
+	print("[0] os")
+	print("[1] urllib")
+	print("[2] urllib2")
+	print("[3] urlparse")
+	print("[4] httplib")
+	print("[5] datetime")
+	print("[6] logging")
+	print("[QUIT]")
+	raise SystemExit
 
 __author__ = "D09r"
 __copyright__ = "Copyright 2018, D09r"
 __license__ = "GNU General Public License v3.0"
-__date__ = "20180623"
+__date__ = "20180705"
 __version__ = "0.0.9"
 __maintainer__ = "D09r"
 __email__ = "d09r@yahoo.com"
@@ -378,7 +395,41 @@ def pagelinks(url,o_file):
 		print("Generic Exception: " + traceback.format_exc())
 	else:
 		f.close()
+		
+def gsb(url,o_file):
+	try:
+		f = open(o_file,"a+")
+		sfurl = "https://safebrowsing.googleapis.com/v4/threatMatches:find?key=SAFEBROWING_API_KEY"
+		para_values = {"client":{"clientId":"recon.py","clientVersion":"0.0.4"},"threatInfo":{'threatTypes':["MALWARE","SOCIAL_ENGINEERING","UNWANTED_SOFTWARE","POTENTIALLY_HARMFUL_APPLICATION","THREAT_TYPE_UNSPECIFIED"],'platformTypes':['ALL_PLATFORMS'],'threatEntryTypes':['URL'],'threatEntries':[{"url":url}]}}
+		data = json.dumps(para_values)
+		req = urllib2.Request(sfurl, data, {'Content-Type': 'application/json; charset=utf-8'})
+		resp = urllib2.urlopen(req)
+		gsb_result = resp.read()
+		print("[-] Retrieved result for %s" % url)
+		isGsbMatch = "matches" in gsb_result
+		if isGsbMatch is False:
+			gsb_res_neg = "%s wasn't found on Google's Safe Browsing list. It doesn't mean that website is benign!" % url
+			print(gsb_res_neg)
+			f.write("****** %s ******\n %s \n\n" % (url, gsb_res_neg))
+		else:
+			print("GSB flagged: %s" % url)
+			print(gsb_result)
+			f.write("****** %s ******\n %s \n\n" % (url, gsb_result))
+	except IOError:
+		print("IOError: Can\'t find the file 'Lookup results' or access them.")
+	except urllib2.HTTPError, e:
+		print("HTTPError: " + str(e.code))
+	except urllib2.URLError, e:
+		print("URLError: " + str(e.reason))
+	except httplib.HTTPException, e:
+		print("HTTPException: " + str(e))
+	except Exception:
+		import traceback
+		print("Generic Exception: " + traceback.format_exc())
+	else:
+		f.close()
 
+		
 def main():
 	done = False
   	if done:
@@ -387,9 +438,9 @@ def main():
 		print(" _  _   _  _   _ ")
 		print("|  (/_ (_ (_) | |")
 		title = "\nRecon"
-		print(title + " - A collection of an IP and Network Tools that can be used to quickly get information about IP Addresses, Web Pages, and DNS records.\n\nNote: There is a limit of 100 API requests per day from a single IP address.\n\nInput file 'lookup_input.txt' should be:\n - a valid domain or subdomain or an URL\n - For example: example.com or downloads.example.com or https://example.com/downloads.html\n - a line separated\n - an unique inputs\n")
+		print(title + " - A collection of an IP, Network and Malware tools that can be used to quickly get information about IP Addresses, Web Pages, and DNS records.\n\nNote: There is a limit of 500 domains per requests for GSB and 100 API requests per day for other tools from a single IP address.\n\nAre you looking for a Recon in GUI version?\n[Chrome] https://chrome.google.com/webstore/detail/lpfpoenklfncdgminmpdoomkbjaiolod\n[Firefox] https://addons.mozilla.org/en-US/firefox/addon/recon-ip-network-tools\n\nInput file 'lookup_input.txt' should be:\n - a valid domain or subdomain or an URL\n - For example: example.com or downloads.example.com or https://example.com/downloads.html\n - a line separated\n - an unique inputs\n")
 		try:
-			option = int(raw_input("[-] DNS Queries\n 1. Whois Lookup\n 2. DNS Lookup\n 3. Reverse DNS\n 4. Find DNS Host (A) Records\n 5. Find Shared DNS Servers\n 6. Zone Transfer\n\n[-] IP Address\n 7. Reverse IP Lookup\n 8. GeoIP Lookup\n 9. Nmap Scan\n 10. Subnet Lookup\n\n[-] Network Tests\n 11. Traceroute\n 12. Test Ping\n\n[-] Web Tools\n 13. HTTP Headers\n 14. Extract Page Links\n\n 0. Quit\n\nChoose the option: "))
+			option = int(raw_input("[-] DNS Queries\n 1. Whois Lookup\n 2. DNS Lookup\n 3. Reverse DNS\n 4. Find DNS Host (A) Records\n 5. Find Shared DNS Servers\n 6. Zone Transfer\n\n[-] IP Address\n 7. Reverse IP Lookup\n 8. GeoIP Lookup\n 9. Nmap Scan\n 10. Subnet Lookup\n\n[-] Network Tests\n 11. Traceroute\n 12. Test Ping\n\n[-] Web Tools\n 13. HTTP Headers\n 14. Extract Page Links\n\n[-] Malware Tools\n 15. Google's SafeBrowsing\n\n 0. Quit\n\nChoose the option: "))
 		except ValueError:
 #			print('\033c')
 			print("[X] Oops! You have entered an invalid option. Please, try a valid option from the menu.")
@@ -447,6 +498,8 @@ def main():
 					httpheaders(domain,o_file)
 				elif option == 14:
 					pagelinks(url,o_file)
+				elif option == 15:
+					gsb(url,o_file)
 				elif option == 0:
 					quit('quit',o_file)
 				elif str(option):
