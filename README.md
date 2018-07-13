@@ -4,7 +4,7 @@ Recon - A collection of an IP and Network Tools that can be used to quickly get 
  _  _   _  _   _ 
 |  (/_ (_ (_) | |
 ```
-Note: There is a limit of 100 API requests per day from a single IP address.
+Note: There is a 500 URLs limit per request for Google's SafeBrowsing lookup and 100 API requests per day from a single IP address for other tools lookup.
 
 Input file 'lookup_input.txt' should be:
  - a valid domain or subdomain or an URL
