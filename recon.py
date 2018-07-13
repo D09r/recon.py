@@ -8,8 +8,7 @@
 #version                : 0.0.9                   
 #usage                  : python recon.py
 #notes                  : There is a 500 URLs limit per request for Google's SafeBrowsing lookup and 100 API                           requests per day from a single IP address for other tools lookup.
-#opensource             : https://github.com/d09r/recon
-                                                 
+#opensource             : https://github.com/d09r/recon                                                 
 #======================================================================================================== 
 
 from __future__ import print_function
@@ -398,8 +397,9 @@ def pagelinks(url,o_file):
 		
 def gsb(url,o_file):
 	try:
+		GSB_API_KEY = os.environ['GSB_API_KEY']
 		f = open(o_file,"a+")
-		sfurl = "https://safebrowsing.googleapis.com/v4/threatMatches:find?key=SAFEBROWING_API_KEY"
+		sfurl = "https://safebrowsing.googleapis.com/v4/threatMatches:find?key=" + GSB_API_KEY
 		para_values = {"client":{"clientId":"recon.py","clientVersion":"0.0.4"},"threatInfo":{'threatTypes':["MALWARE","SOCIAL_ENGINEERING","UNWANTED_SOFTWARE","POTENTIALLY_HARMFUL_APPLICATION","THREAT_TYPE_UNSPECIFIED"],'platformTypes':['ALL_PLATFORMS'],'threatEntryTypes':['URL'],'threatEntries':[{"url":url}]}}
 		data = json.dumps(para_values)
 		req = urllib2.Request(sfurl, data, {'Content-Type': 'application/json; charset=utf-8'})
